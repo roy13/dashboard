@@ -48,15 +48,17 @@ function feedvalue_widgetlist()
     ];
 
   var unitEndOptions = [
-        [0, "Back"],
-        [1, "Front"]
+        [0, "After"],
+        [1, "Before"]
     ];
 
   addOption(widgets["feedvalue"], "feedid",   "feedid",  _Tr("Feed"),          _Tr("Feed value"),      []);
   addOption(widgets["feedvalue"], "units",    "value",   _Tr("Units"),         _Tr("Units to show"),   []);
   addOption(widgets["feedvalue"], "unitend",  "dropbox", _Tr("Unit position"), _Tr("Where should the unit be shown"), unitEndOptions);
   addOption(widgets["feedvalue"], "decimals", "dropbox", _Tr("Decimals"),      _Tr("Decimals to show"),    decimalsDropBoxOptions);
-
+  addOption(widgets["feedvalue"], "scale",    "value",   _Tr("Scale"),         _Tr("Value is multiplied by scale before display"), []);	// allow them to scale the feed value
+  addOption(widgets["feedvalue"], "colour",   "colour_picker", _Tr("Colour"),  _Tr("Colour to draw with"), []);	// allow them to chose a colour for the feed value
+	
   return widgets;
 }
 
@@ -83,7 +85,16 @@ function feedvalue_draw()
 
     var unitend = $(this).attr("unitend");
     if (unitend==undefined) unitend = 0;
-    
+   
+        // scale the value before display
+    var scale = $(this).attr("scale");
+    if( scale == undefined || isNaN( scale ) || scale.length < 1 ) scale = 1.0;	// default to 1.0 if invalid
+    val = val * scale;	// scale the value
+	
+	// grab the draw colour
+    var colour = $(this).attr("colour");
+    if( colour == undefined ) colour = '4444CC';	// default to the emoncms blue
+
    
     if (decimals<0)
     {
@@ -106,13 +117,14 @@ function feedvalue_draw()
     
     val = parseFloat(val);
 	
+    // Added font colour tags
     if (unitend == 0)
     {
-      $(this).html(val+units);
+      $(this).html("<font color="+colour+">"+val+units+"</font>");
     }
     else
     {
-      $(this).html(units+val);
+      $(this).html("<font color="+colour+">"+units+val+"</font>");
     }
   });
 }
